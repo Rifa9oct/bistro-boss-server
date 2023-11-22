@@ -27,23 +27,36 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     //await client.connect();
 
-    const menusCollection = client.db('bistroDB').collection('menus');
-    const reviewsCollection = client.db('bistroDB').collection('reviews');
+    const menuCollection = client.db('bistroDB').collection('menus');
+    const reviewCollection = client.db('bistroDB').collection('reviews');
+    const cartCollection = client.db('bistroDB').collection('carts');
 
-    
+
     app.get('/menus', async (req, res) => {
-        // console.log("cookies", req.cookies)
-        const cursor = menusCollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
-      })
+      const cursor = menuCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
 
     app.get('/reviews', async (req, res) => {
-        // console.log("cookies", req.cookies)
-        const cursor = reviewsCollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
-      })
+      const cursor = reviewCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+    //carts collection
+    app.get('/carts', async (req, res) => {
+      const email = req.query.email;
+      const query = {email: email};
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    app.post("/carts", async (req, res) => {
+      const cartItem = req.body;
+      const result = await cartCollection.insertOne(cartItem);
+      res.send(result);
+    })
 
 
 
@@ -62,10 +75,10 @@ run().catch(console.dir);
 
 
 
-app.get('/',(req, res)=>{
-    res.send("BISTRO BOSS SERVER IS RUNNING....")
+app.get('/', (req, res) => {
+  res.send("BISTRO BOSS SERVER IS RUNNING....")
 })
 
-app.listen(port, ()=>{
-    console.log(`Bistro boss server is running, ${port}`)
+app.listen(port, () => {
+  console.log(`Bistro boss server is running, ${port}`)
 })
