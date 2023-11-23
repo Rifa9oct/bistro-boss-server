@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require("jsonwebtoken");
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
@@ -30,8 +31,24 @@ async function run() {
     const menuCollection = client.db('bistroDB').collection('menus');
     const reviewCollection = client.db('bistroDB').collection('reviews');
     const cartCollection = client.db('bistroDB').collection('carts');
+    const userCollection = client.db('bistroDB').collection('users');
+
+    //user related api
+    app.post("/users", async(req,res)=>{
+      const user = req.body;
+      //insert email if user doesn't exists.
+      const query = {email: user.email}
+      const existingUser = await userCollection.findOne(query);
+      if(existingUser){
+        return res.send({message: "user already exists", insertedId: null})
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
 
 
+
+    //public api
     app.get('/menus', async (req, res) => {
       const cursor = menuCollection.find();
       const result = await cursor.toArray();
@@ -64,10 +81,6 @@ async function run() {
       const result = await cartCollection.deleteOne(query);
       res.send(result);
     })
-
-
-
-
 
 
     // Send a ping to confirm a successful connection
